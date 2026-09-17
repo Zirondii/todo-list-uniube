@@ -1,0 +1,44 @@
+services:
+
+  # Banco de dados MySQL
+  mysql:
+    image: mysql:8.0
+    container_name: todolist-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: todolist
+    ports:
+      # Porta 3307 na maquina para nao conflitar com um MySQL ja instalado
+      - "3307:3306"
+    volumes:
+      # Todo arquivo .sql colocado nesta pasta e executado automaticamente
+      # na primeira vez que o banco sobe (cria as tabelas e os dados iniciais)
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      # O MySQL demora alguns segundos ate aceitar conexoes.
+      # Este teste avisa ao Docker quando ele realmente esta pronto.
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Aplicacao Java rodando no Tomcat
+  app:
+    build: .
+    container_name: todolist-app
+    ports:
+      - "8080:8080"
+    environment:
+      # Dentro do Docker o endereco do banco e o nome do servico ("mysql"),
+      # e nao "localhost" - localhost aqui seria o proprio container do Tomcat
+      DB_URL: jdbc:mysql://mysql:3306/todolist?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      DB_USER: root
+      DB_PASSWORD: root
+    depends_on:
+      mysql:
+        # So inicia depois que o healthcheck do banco passar
+        condition: service_healthy
+
+volumes:
+  mysql_data:
