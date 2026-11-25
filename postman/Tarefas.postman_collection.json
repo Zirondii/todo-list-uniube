@@ -1,0 +1,198 @@
+{
+  "info": {
+    "name": "Lista de Tarefas",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8081"
+    },
+    {
+      "key": "login",
+      "value": ""
+    },
+    {
+      "key": "senha",
+      "value": ""
+    },
+    {
+      "key": "id",
+      "value": ""
+    },
+    {
+      "key": "token",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Cadastrar",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/api/auth/cadastro",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"login\": \"{{login}}\",\n  \"senha\": \"{{senha}}\",\n  \"confirmacaoSenha\": \"{{senha}}\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Entrar",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/api/auth/login",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"login\": \"{{login}}\",\n  \"senha\": \"{{senha}}\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.response.code === 200) pm.collectionVariables.set(\"token\", pm.response.json().token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Criar",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/api/tarefas",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"titulo\": \"Estudar MVC\",\n  \"descricao\": \"Rever a aula\",\n  \"concluida\": false\n}"
+        }
+      }
+    },
+    {
+      "name": "Listar",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/tarefas",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Consultar",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/tarefas/{{id}}",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Editar",
+      "request": {
+        "method": "PUT",
+        "url": "{{baseUrl}}/api/tarefas/{{id}}",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"titulo\": \"Revisar o projeto\",\n  \"descricao\": \"\",\n  \"concluida\": false\n}"
+        }
+      }
+    },
+    {
+      "name": "Concluir",
+      "request": {
+        "method": "PATCH",
+        "url": "{{baseUrl}}/api/tarefas/{{id}}",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"concluida\": true\n}"
+        }
+      }
+    },
+    {
+      "name": "Reabrir",
+      "request": {
+        "method": "PATCH",
+        "url": "{{baseUrl}}/api/tarefas/{{id}}",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"concluida\": false\n}"
+        }
+      }
+    },
+    {
+      "name": "Excluir",
+      "request": {
+        "method": "DELETE",
+        "url": "{{baseUrl}}/api/tarefas/{{id}}",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ]
+      }
+    }
+  ]
+}

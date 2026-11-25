@@ -5,7 +5,7 @@ services:
     image: mysql:8.0
     container_name: todolist-mysql
     environment:
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
       MYSQL_DATABASE: todolist
     ports:
       # Porta 3307 na maquina para nao conflitar com um MySQL ja instalado
@@ -18,27 +18,32 @@ services:
     healthcheck:
       # O MySQL demora alguns segundos ate aceitar conexoes.
       # Este teste avisa ao Docker quando ele realmente esta pronto.
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot"]
       interval: 5s
       timeout: 5s
       retries: 10
 
-  # Aplicacao Java rodando no Tomcat
+  api:
+    build: ./api
+    ports:
+      - "127.0.0.1:8081:8080"
+    environment:
+      DB_URL: jdbc:mysql://mysql:3306/todolist?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      DB_USER: root
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      JWT_SECRET: ${JWT_SECRET:?Configure JWT_SECRET no arquivo .env}
+    depends_on:
+      mysql:
+        condition: service_healthy
+
   app:
-    build: .
-    container_name: todolist-app
+    build: ./tarefas
     ports:
       - "8080:8080"
     environment:
-      # Dentro do Docker o endereco do banco e o nome do servico ("mysql"),
-      # e nao "localhost" - localhost aqui seria o proprio container do Tomcat
-      DB_URL: jdbc:mysql://mysql:3306/todolist?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-      DB_USER: root
-      DB_PASSWORD: root
+      API_URL: http://api:8080
     depends_on:
-      mysql:
-        # So inicia depois que o healthcheck do banco passar
-        condition: service_healthy
+      - api
 
 volumes:
   mysql_data:
