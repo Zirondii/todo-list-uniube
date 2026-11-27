@@ -1,6 +1,6 @@
 # Lista de Tarefas — Uniube
 
-Trabalho de Aplicações para Internet. O navegador carrega as telas JSP e envia JSON ao proxy do front. O proxy encaminha a chamada HTTP à API. A API identifica o usuário pelo JWT, aplica as regras na camada Service e consulta o MySQL pelos DAOs.
+Trabalho de Aplicações para Internet. O PaginaServlet encaminha as URLs das telas às JSPs em WEB-INF/views. No mini-backend web, o controller chama TarefaService e o ApiDAO acessa a API via HTTP com o JWT do navegador. Na listagem, GET /dados/lista monta o modelo ListaTarefas com as tarefas do usuário, o total e a quantidade pendente que a tela exibe. As rotas /api/* preservam os contratos da API. A API identifica o usuário pelo JWT, aplica as regras na camada Service e consulta o MySQL pelos DAOs. RespostaJson escreve a representação HTTP dos resultados e erros.
 
 ## Executar no PowerShell
 

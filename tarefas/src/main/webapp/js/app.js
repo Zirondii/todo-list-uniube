@@ -9,14 +9,14 @@ function sair() {
     sessionStorage.removeItem("tarefas.login");
 }
 
-async function api(caminho, metodo = "GET", dados) {
+async function requisitar(caminho, metodo = "GET", dados) {
     const headers = {Accept: "application/json"};
     if (token()) headers.Authorization = "Bearer " + token();
     if (dados) headers["Content-Type"] = "application/json";
-    const resposta = await fetch(base + "/api" + caminho, {
+    const resposta = await fetch(base + caminho, {
         method: metodo, headers, body: JSON.stringify(dados)
     });
-    if (resposta.status === 401 && !caminho.startsWith("/auth/")) {
+    if (resposta.status === 401 && !caminho.startsWith("/api/auth/")) {
         sair();
         ir("/login");
         throw new Error("Sessão expirada.");
@@ -26,6 +26,8 @@ async function api(caminho, metodo = "GET", dados) {
     if (!resposta.ok) throw new Error(resultado?.erro || "Falha ao acessar a API.");
     return resultado;
 }
+
+const api = (caminho, metodo, dados) => requisitar("/api" + caminho, metodo, dados);
 
 function mostrarErro(erro) {
     const aviso = document.querySelector(".erro");
@@ -70,7 +72,7 @@ function elemento(tag, texto, classe) {
 }
 
 async function listar() {
-    const tarefas = await api("/tarefas");
+    const {tarefas, total, pendentes} = await requisitar("/dados/lista");
     const corpo = document.querySelector("tbody");
     corpo.replaceChildren();
     for (const tarefa of tarefas) {
@@ -103,8 +105,7 @@ async function listar() {
     }
     document.querySelector("table").hidden = tarefas.length === 0;
     document.querySelector(".vazio").hidden = tarefas.length > 0;
-    const pendentes = tarefas.filter(tarefa => !tarefa.concluida).length;
-    document.querySelector(".resumo").textContent = tarefas.length + " tarefa(s) - " + pendentes + " pendente(s)";
+    document.querySelector(".resumo").textContent = total + " tarefa(s) - " + pendentes + " pendente(s)";
 }
 
 async function iniciar() {
